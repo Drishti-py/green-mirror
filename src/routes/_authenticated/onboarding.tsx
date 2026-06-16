@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { extractBaselineFromBill } from "@/lib/bill-ocr.functions";
+import type { TablesInsert, Json } from "@/integrations/supabase/types";
+
+type OnboardingRow = TablesInsert<"onboarding_responses">;
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Begin — GreenMirror" }] }),
