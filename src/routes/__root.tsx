@@ -92,6 +92,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "GreenMirror — Your world reflects your footprint" },
+      { name: "description", content: "An AI-powered platform that visualizes your environmental impact as a living digital ecosystem." },
+      { property: "og:description", content: "An AI-powered platform that visualizes your environmental impact as a living digital ecosystem." },
+      { name: "twitter:description", content: "An AI-powered platform that visualizes your environmental impact as a living digital ecosystem." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b6cfd353-643f-4906-9734-bc95e46ed9c5/id-preview-92a0f3bd--96f537d0-57cc-4d78-bd90-ed9946f3b745.lovable.app-1781618399469.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b6cfd353-643f-4906-9734-bc95e46ed9c5/id-preview-92a0f3bd--96f537d0-57cc-4d78-bd90-ed9946f3b745.lovable.app-1781618399469.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
