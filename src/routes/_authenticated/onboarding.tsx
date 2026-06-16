@@ -83,7 +83,7 @@ function Onboarding() {
     try {
       const { error: e1 } = await supabase
         .from("onboarding_responses")
-        .upsert({ user_id: userId, ...answers });
+        .upsert({ user_id: userId, ...answers } as OnboardingRow);
       if (e1) throw e1;
       const { error: e2 } = await supabase
         .from("profiles")
@@ -103,7 +103,7 @@ function Onboarding() {
     const merged = { ...answers, ...patch };
     setAnswers(merged);
     if (userId) {
-      await supabase.from("onboarding_responses").upsert({ user_id: userId, ...merged });
+      await supabase.from("onboarding_responses").upsert({ user_id: userId, ...merged } as OnboardingRow);
     }
   };
 
