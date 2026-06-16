@@ -29,7 +29,7 @@ type Answers = {
   monthly_bill_amount?: number | null;
   bill_image_path?: string | null;
   baseline_kg_co2_per_month?: number | null;
-  ai_extraction?: unknown;
+  ai_extraction?: Json;
 };
 
 const STEPS = [
