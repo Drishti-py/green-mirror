@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+vitest-results.json\ncoverage/
+
+vitest-results.json
+coverage/

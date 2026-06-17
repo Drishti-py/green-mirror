@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { dailyEmissionsKg, ecosystemDelta } from "./carbon";
 
 const logSchema = z.object({
   transport_mode: z.enum(["walk_bike", "transit", "car", "long_drive", "flight"]),
@@ -12,20 +13,6 @@ const logSchema = z.object({
   notes: z.string().max(500).optional().nullable(),
 });
 
-// rough per-day kg CO2 estimates (illustrative, not scientific)
-const TRANSPORT_KG: Record<string, number> = {
-  walk_bike: 0,
-  transit: 1.2,
-  car: 4.6,
-  long_drive: 11,
-  flight: 90,
-};
-const MEALS_KG: Record<string, number> = {
-  plant_based: 1.7,
-  mixed: 3.2,
-  meat_heavy: 6.1,
-};
-
 export const logReflection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof logSchema>) => logSchema.parse(d))
@@ -33,25 +20,23 @@ export const logReflection = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const today = new Date().toISOString().slice(0, 10);
 
-    const energy = data.energy_mindful ? -0.6 : 0.4;
-    const water = data.water_mindful ? -0.2 : 0.1;
-    const waste = data.waste_mindful ? -0.3 : 0.2;
-    const kg =
-      TRANSPORT_KG[data.transport_mode] +
-      MEALS_KG[data.meals] +
-      energy + water + waste;
+    const kg = dailyEmissionsKg({
+      transport: data.transport_mode,
+      meals: data.meals,
+      energy_mindful: data.energy_mindful,
+      water_mindful: data.water_mindful,
+      waste_mindful: data.waste_mindful,
+    });
 
-    // baseline daily: monthly / 30
     const { data: ob } = await supabase
       .from("onboarding_responses")
       .select("baseline_kg_co2_per_month")
       .eq("user_id", userId)
       .maybeSingle();
-    const baselineDaily =
-      ob?.baseline_kg_co2_per_month != null
-        ? Number(ob.baseline_kg_co2_per_month) / 30
-        : 15;
-    const delta = baselineDaily - kg; // positive = better than baseline
+    const delta = ecosystemDelta(
+      kg,
+      ob?.baseline_kg_co2_per_month != null ? Number(ob.baseline_kg_co2_per_month) : null,
+    );
 
     const { data: reflection, error } = await supabase
       .from("daily_reflections")

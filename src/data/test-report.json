@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-06-17T09:49:18.128Z",
+  "totals": {
+    "passed": 94,
+    "failed": 0,
+    "total": 94,
+    "suites": 26
+  },
+  "overallCoverage": {
+    "lines": 97.67,
+    "statements": 97.14,
+    "functions": 95,
+    "branches": 93.75
+  },
+  "businessLogicCoverage": 98.33,
+  "modules": [
+    {
+      "path": "src/lib/carbon.ts",
+      "lines": 100,
+      "functions": 100,
+      "branches": 100,
+      "covered": true
+    },
+    {
+      "path": "src/lib/recommendations.ts",
+      "lines": 90,
+      "functions": 75,
+      "branches": 76.66,
+      "covered": true
+    },
+    {
+      "path": "src/lib/dashboard-state.ts",
+      "lines": 100,
+      "functions": 100,
+      "branches": 100,
+      "covered": true
+    },
+    {
+      "path": "src/lib/auth-guard.ts",
+      "lines": 100,
+      "functions": 100,
+      "branches": 100,
+      "covered": true
+    },
+    {
+      "path": "src/lib/profile.ts",
+      "lines": 100,
+      "functions": 100,
+      "branches": 97.14,
+      "covered": true
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "lines": 100,
+      "functions": 100,
+      "branches": 100,
+      "covered": true
+    }
+  ],
+  "thresholds": {
+    "overallLines": 70,
+    "businessLogicLines": 80
+  }
+}
