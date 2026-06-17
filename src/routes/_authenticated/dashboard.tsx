@@ -1,10 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CarbonOrb } from "@/components/dashboard/CarbonOrb";
 import { LivingEcosystem } from "@/components/dashboard/LivingEcosystem";
 import { CoachPanel } from "@/components/dashboard/CoachPanel";
+import { ReflectionRitual } from "@/components/dashboard/ReflectionRitual";
+import { StreakBadge } from "@/components/dashboard/StreakBadge";
+import { getTodayContext } from "@/lib/reflection.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Your Mirror — GreenMirror" }] }),
@@ -20,18 +24,39 @@ interface Ctx {
   climate_goal: string | null;
 }
 
+type Reflection = {
+  transport_mode: string | null;
+  meals: string | null;
+  energy_mindful: boolean | null;
+  water_mindful: boolean | null;
+  waste_mindful: boolean | null;
+  mood: string | null;
+  notes: string | null;
+  ecosystem_delta: number | null;
+} | null;
+
+type Streak = {
+  current_streak: number;
+  longest_streak: number;
+  total_reflections: number;
+} | null;
+
 function Dashboard() {
   const navigate = useNavigate();
+  const fetchToday = useServerFn(getTodayContext);
   const [name, setName] = useState<string>("");
   const [baseline, setBaseline] = useState<number | null>(null);
   const [ctx, setCtx] = useState<Ctx | null>(null);
   const [ready, setReady] = useState(false);
+  const [reflection, setReflection] = useState<Reflection>(null);
+  const [streak, setStreak] = useState<Streak>(null);
+  const [todayDelta, setTodayDelta] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const [{ data: profile }, { data: ob }] = await Promise.all([
+      const [{ data: profile }, { data: ob }, today] = await Promise.all([
         supabase
           .from("profiles")
           .select("display_name, onboarding_completed")
@@ -44,6 +69,7 @@ function Dashboard() {
           )
           .eq("user_id", u.user.id)
           .maybeSingle(),
+        fetchToday().catch(() => ({ reflection: null, streak: null })),
       ]);
       if (profile && !profile.onboarding_completed) {
         navigate({ to: "/onboarding", replace: true });
@@ -59,15 +85,50 @@ function Dashboard() {
         household_size: ob?.household_size ?? null,
         climate_goal: ob?.climate_goal ?? null,
       });
+      setReflection((today?.reflection as Reflection) ?? null);
+      setStreak((today?.streak as Streak) ?? null);
+      setTodayDelta(today?.reflection?.ecosystem_delta ?? null);
       setReady(true);
     })();
-  }, [navigate]);
+  }, [navigate, fetchToday]);
 
-  const health = useMemo(() => {
+  const baselineHealth = useMemo(() => {
     if (baseline == null) return 0.6;
-    const ratio = Math.min(baseline / 417, 2); // 417 kg/mo ≈ 5 t/yr target
+    const ratio = Math.min(baseline / 417, 2);
     return Math.max(0, 1 - ratio / 2);
   }, [baseline]);
+
+  // Today's reflection nudges health up or down a touch in real time.
+  const health = useMemo(() => {
+    if (todayDelta == null) return baselineHealth;
+    const nudge = Math.max(-0.18, Math.min(0.18, todayDelta / 30));
+    return Math.max(0, Math.min(1, baselineHealth + nudge));
+  }, [baselineHealth, todayDelta]);
+
+  const handleLogged = useCallback(
+    (delta: number) => {
+      setTodayDelta(delta);
+      // optimistic streak bump if first log today
+      if (!reflection) {
+        setStreak((s) => ({
+          current_streak: (s?.current_streak ?? 0) + 1,
+          longest_streak: Math.max(s?.longest_streak ?? 0, (s?.current_streak ?? 0) + 1),
+          total_reflections: (s?.total_reflections ?? 0) + 1,
+        }));
+        setReflection({
+          transport_mode: null,
+          meals: null,
+          energy_mindful: null,
+          water_mindful: null,
+          waste_mindful: null,
+          mood: null,
+          notes: null,
+          ecosystem_delta: delta,
+        });
+      }
+    },
+    [reflection],
+  );
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -76,15 +137,16 @@ function Dashboard() {
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
-      {/* aurora backdrop */}
       <div
         className="fixed inset-0 -z-10 opacity-50 pointer-events-none"
-        style={{ background: "var(--gradient-aurora, radial-gradient(at 30% 20%, oklch(0.3 0.08 152 / 0.35), transparent 60%))" }}
+        style={{
+          background:
+            "var(--gradient-aurora, radial-gradient(at 30% 20%, oklch(0.3 0.08 152 / 0.35), transparent 60%))",
+        }}
         aria-hidden
       />
 
       <div className="max-w-6xl mx-auto px-6 py-12 lg:py-16 space-y-10">
-        {/* header */}
         <header className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <span className="font-mono text-[10px] tracking-[0.3em] text-primary uppercase">
@@ -97,12 +159,20 @@ function Dashboard() {
               Your world reflects your footprint. Watch it breathe.
             </p>
           </div>
-          <Button variant="ghost" onClick={signOut} className="font-mono text-xs">
-            Sign out
-          </Button>
+          <div className="flex items-center gap-3 flex-wrap">
+            {streak && (
+              <StreakBadge
+                current={streak.current_streak}
+                longest={streak.longest_streak}
+                total={streak.total_reflections}
+              />
+            )}
+            <Button variant="ghost" onClick={signOut} className="font-mono text-xs">
+              Sign out
+            </Button>
+          </div>
         </header>
 
-        {/* orb + coach */}
         <section className="grid lg:grid-cols-[1fr_1fr] gap-6 lg:gap-10 items-stretch">
           <div className="rounded-2xl border border-border/60 bg-card/30 backdrop-blur p-8 flex flex-col items-center justify-center">
             <CarbonOrb value={baseline} />
@@ -113,19 +183,24 @@ function Dashboard() {
           {ctx && <CoachPanel baselineKg={baseline} context={ctx} />}
         </section>
 
-        {/* ecosystem */}
-        <section className="space-y-4">
-          <div className="flex items-baseline justify-between flex-wrap gap-2">
-            <h2 className="text-2xl font-bold tracking-tight">Living ecosystem</h2>
-            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-              Health · {Math.round(health * 100)}%
-            </span>
+        <section className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-start">
+          <ReflectionRitual initial={reflection} onLogged={handleLogged} />
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between flex-wrap gap-2">
+              <h2 className="text-2xl font-bold tracking-tight">Living ecosystem</h2>
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+                Health · {Math.round(health * 100)}%
+              </span>
+            </div>
+            <LivingEcosystem health={health} />
+            <p className="text-sm text-muted-foreground">
+              {todayDelta == null
+                ? "Each habit you log shapes this world — trees thicken, fireflies return, mist lifts."
+                : todayDelta >= 0
+                  ? `Today you spared ${todayDelta.toFixed(1)} kg CO₂. The canopy thickens.`
+                  : `Today ran ${Math.abs(todayDelta).toFixed(1)} kg over baseline. The mist returns.`}
+            </p>
           </div>
-          <LivingEcosystem health={health} />
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Each habit you log shapes this world — trees thicken, fireflies return, mist lifts.
-            Daily reflection and wildlife unlocks arrive next.
-          </p>
         </section>
       </div>
     </main>
