@@ -31,3 +31,6 @@ dist-ssr
 *.sln
 *.sw?
 vitest-results.json\ncoverage/
+
+vitest-results.json
+coverage/
