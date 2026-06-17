@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_reflections: {
+        Row: {
+          created_at: string
+          ecosystem_delta: number | null
+          energy_mindful: boolean | null
+          estimated_kg_co2_today: number | null
+          id: string
+          meals: string | null
+          mood: string | null
+          notes: string | null
+          reflection_date: string
+          transport_mode: string | null
+          updated_at: string
+          user_id: string
+          waste_mindful: boolean | null
+          water_mindful: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          ecosystem_delta?: number | null
+          energy_mindful?: boolean | null
+          estimated_kg_co2_today?: number | null
+          id?: string
+          meals?: string | null
+          mood?: string | null
+          notes?: string | null
+          reflection_date?: string
+          transport_mode?: string | null
+          updated_at?: string
+          user_id: string
+          waste_mindful?: boolean | null
+          water_mindful?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          ecosystem_delta?: number | null
+          energy_mindful?: boolean | null
+          estimated_kg_co2_today?: number | null
+          id?: string
+          meals?: string | null
+          mood?: string | null
+          notes?: string | null
+          reflection_date?: string
+          transport_mode?: string | null
+          updated_at?: string
+          user_id?: string
+          waste_mindful?: boolean | null
+          water_mindful?: boolean | null
+        }
+        Relationships: []
+      }
       onboarding_responses: {
         Row: {
           ai_extraction: Json | null
@@ -101,6 +152,36 @@ export type Database = {
         }
         Relationships: []
       }
+      streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          last_reflection_date: string | null
+          longest_streak: number
+          total_reflections: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          last_reflection_date?: string | null
+          longest_streak?: number
+          total_reflections?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          last_reflection_date?: string | null
+          longest_streak?: number
+          total_reflections?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -133,6 +214,24 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      upsert_streak_for_user: {
+        Args: { _today: string; _user_id: string }
+        Returns: {
+          created_at: string
+          current_streak: number
+          last_reflection_date: string | null
+          longest_streak: number
+          total_reflections: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "streaks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
