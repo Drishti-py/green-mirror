@@ -27,4 +27,4 @@ export const StreakBadge = memo(function StreakBadge({ current, longest, total }
       </span>
     </div>
   );
-}
+});
