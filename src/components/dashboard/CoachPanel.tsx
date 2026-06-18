@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { askCoach } from "@/lib/coach.functions";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ const STARTERS = [
   "Give me a 7-day micro-challenge.",
 ];
 
-export function CoachPanel({ baselineKg, context }: Props) {
+export const CoachPanel = memo(function CoachPanel({ baselineKg, context }: Props) {
   const ask = useServerFn(askCoach);
   const [messages, setMessages] = useState<Msg[]>([
     {
@@ -37,26 +37,29 @@ export function CoachPanel({ baselineKg, context }: Props) {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const send = async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || loading) return;
-    const next: Msg[] = [...messages, { role: "user", content: trimmed }];
-    setMessages(next);
-    setInput("");
-    setLoading(true);
-    try {
-      const res = await ask({ data: { messages: next, baselineKg, context } });
-      setMessages([...next, { role: "assistant", content: res.reply || "…" }]);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Coach unavailable.";
-      setMessages([...next, { role: "assistant", content: `⚠ ${msg}` }]);
-    } finally {
-      setLoading(false);
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-      });
-    }
-  };
+  const send = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || loading) return;
+      const next: Msg[] = [...messages, { role: "user", content: trimmed }];
+      setMessages(next);
+      setInput("");
+      setLoading(true);
+      try {
+        const res = await ask({ data: { messages: next, baselineKg, context } });
+        setMessages([...next, { role: "assistant", content: res.reply || "…" }]);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Coach unavailable.";
+        setMessages([...next, { role: "assistant", content: `⚠ ${msg}` }]);
+      } finally {
+        setLoading(false);
+        requestAnimationFrame(() => {
+          scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+        });
+      }
+    },
+    [ask, baselineKg, context, loading, messages],
+  );
 
   return (
     <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur overflow-hidden h-full min-h-[420px]">
@@ -128,4 +131,4 @@ export function CoachPanel({ baselineKg, context }: Props) {
       </form>
     </div>
   );
-}
+});

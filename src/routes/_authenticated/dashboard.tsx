@@ -1,14 +1,24 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CarbonOrb } from "@/components/dashboard/CarbonOrb";
-import { LivingEcosystem } from "@/components/dashboard/LivingEcosystem";
-import { CoachPanel } from "@/components/dashboard/CoachPanel";
 import { ReflectionRitual } from "@/components/dashboard/ReflectionRitual";
 import { StreakBadge } from "@/components/dashboard/StreakBadge";
 import { getTodayContext } from "@/lib/reflection.functions";
+
+// Lazy-load heavy panels: AI Coach (server-fn chat) and the SVG ecosystem
+// biome only render when their data is ready, so deferring them keeps the
+// initial dashboard bundle small.
+const LivingEcosystem = lazy(() =>
+  import("@/components/dashboard/LivingEcosystem").then((m) => ({
+    default: m.LivingEcosystem,
+  })),
+);
+const CoachPanel = lazy(() =>
+  import("@/components/dashboard/CoachPanel").then((m) => ({ default: m.CoachPanel })),
+);
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Your Mirror — GreenMirror" }] }),
@@ -167,6 +177,11 @@ function Dashboard() {
                 total={streak.total_reflections}
               />
             )}
+            <Link to="/profile">
+              <Button variant="ghost" className="font-mono text-xs">
+                Profile
+              </Button>
+            </Link>
             <Button variant="ghost" onClick={signOut} className="font-mono text-xs">
               Sign out
             </Button>
@@ -180,7 +195,15 @@ function Dashboard() {
               Your carbon orb pulses to the rhythm of your monthly emissions.
             </p>
           </div>
-          {ctx && <CoachPanel baselineKg={baseline} context={ctx} />}
+          {ctx && (
+            <Suspense
+              fallback={
+                <div className="rounded-2xl border border-border/60 bg-card/40 min-h-[420px] animate-pulse" />
+              }
+            >
+              <CoachPanel baselineKg={baseline} context={ctx} />
+            </Suspense>
+          )}
         </section>
 
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-start">
@@ -192,7 +215,13 @@ function Dashboard() {
                 Health · {Math.round(health * 100)}%
               </span>
             </div>
-            <LivingEcosystem health={health} />
+            <Suspense
+              fallback={
+                <div className="aspect-[16/9] rounded-2xl border border-border/60 bg-card/40 animate-pulse" />
+              }
+            >
+              <LivingEcosystem health={health} />
+            </Suspense>
             <p className="text-sm text-muted-foreground">
               {todayDelta == null
                 ? "Each habit you log shapes this world — trees thicken, fireflies return, mist lifts."

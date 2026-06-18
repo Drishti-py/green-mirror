@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 interface Props {
   /** kg CO₂ / month — null when unknown */
@@ -11,7 +11,7 @@ interface Props {
  * CarbonOrb — animated glass sphere whose health/hue/glow reflects footprint.
  * Pure SVG + CSS; no WebGL. Respects prefers-reduced-motion via base styles.
  */
-export function CarbonOrb({ value, target = 417 }: Props) {
+export const CarbonOrb = memo(function CarbonOrb({ value, target = 417 }: Props) {
   const { health, hue, label } = useMemo(() => {
     if (value == null) return { health: 0.6, hue: 152, label: "—" };
     // ratio: 0 (none) → 0.5 (target) → >1 (over)
@@ -106,4 +106,4 @@ export function CarbonOrb({ value, target = 417 }: Props) {
       </div>
     </div>
   );
-}
+});

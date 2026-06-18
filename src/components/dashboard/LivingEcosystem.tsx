@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 interface Props {
   /** 0 (collapsed) → 1 (flourishing) */
@@ -9,7 +9,7 @@ interface Props {
  * LivingEcosystem — SVG biome that morphs with the user's footprint health.
  * Trees, mist, wildlife dots appear progressively. CSS-only motion.
  */
-export function LivingEcosystem({ health }: Props) {
+export const LivingEcosystem = memo(function LivingEcosystem({ health }: Props) {
   const h = Math.max(0, Math.min(1, health));
 
   const trees = useMemo(() => {
@@ -136,4 +136,4 @@ export function LivingEcosystem({ health }: Props) {
       </svg>
     </div>
   );
-}
+});
