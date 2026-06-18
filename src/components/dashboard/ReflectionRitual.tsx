@@ -133,7 +133,7 @@ export const ReflectionRitual = memo(function ReflectionRitual({ initial, onLogg
       </Button>
     </div>
   );
-}
+});
 
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
