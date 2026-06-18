@@ -1,10 +1,12 @@
+import { memo } from "react";
+
 interface Props {
   current: number;
   longest: number;
   total: number;
 }
 
-export function StreakBadge({ current, longest, total }: Props) {
+export const StreakBadge = memo(function StreakBadge({ current, longest, total }: Props) {
   return (
     <div className="inline-flex items-center gap-4 rounded-full border border-border/60 bg-card/40 backdrop-blur px-5 py-2.5">
       <div className="flex items-center gap-2">
