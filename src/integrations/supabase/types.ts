@@ -182,6 +182,57 @@ export type Database = {
         }
         Relationships: []
       }
+      user_documents: {
+        Row: {
+          created_at: string
+          document_date: string | null
+          estimated_kg_co2: number | null
+          extraction: Json | null
+          file_path: string
+          id: string
+          kind: Database["public"]["Enums"]["document_kind"]
+          mime_type: string | null
+          notes: string | null
+          size_bytes: number | null
+          status: Database["public"]["Enums"]["document_status"]
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_date?: string | null
+          estimated_kg_co2?: number | null
+          extraction?: Json | null
+          file_path: string
+          id?: string
+          kind?: Database["public"]["Enums"]["document_kind"]
+          mime_type?: string | null
+          notes?: string | null
+          size_bytes?: number | null
+          status?: Database["public"]["Enums"]["document_status"]
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_date?: string | null
+          estimated_kg_co2?: number | null
+          extraction?: Json | null
+          file_path?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["document_kind"]
+          mime_type?: string | null
+          notes?: string | null
+          size_bytes?: number | null
+          status?: Database["public"]["Enums"]["document_status"]
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -236,6 +287,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      document_kind:
+        | "electricity_bill"
+        | "fuel_receipt"
+        | "grocery_receipt"
+        | "water_bill"
+        | "other"
+      document_status: "processing" | "processed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -364,6 +422,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      document_kind: [
+        "electricity_bill",
+        "fuel_receipt",
+        "grocery_receipt",
+        "water_bill",
+        "other",
+      ],
+      document_status: ["processing", "processed", "failed"],
     },
   },
 } as const
