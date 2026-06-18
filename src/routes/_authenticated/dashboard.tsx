@@ -206,16 +206,6 @@ function Dashboard() {
           )}
         </section>
 
-        <section className="grid lg:grid-cols-[1fr_1fr] gap-6 lg:gap-10 items-stretch">
-          <div className="rounded-2xl border border-border/60 bg-card/30 backdrop-blur p-8 flex flex-col items-center justify-center">
-            <CarbonOrb value={baseline} />
-            <p className="mt-6 font-mono text-[10px] tracking-widest uppercase text-muted-foreground text-center max-w-xs">
-              Your carbon orb pulses to the rhythm of your monthly emissions.
-            </p>
-          </div>
-          {ctx && <CoachPanel baselineKg={baseline} context={ctx} />}
-        </section>
-
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-start">
           <ReflectionRitual initial={reflection} onLogged={handleLogged} />
           <div className="space-y-4">
@@ -225,7 +215,13 @@ function Dashboard() {
                 Health · {Math.round(health * 100)}%
               </span>
             </div>
-            <LivingEcosystem health={health} />
+            <Suspense
+              fallback={
+                <div className="aspect-[16/9] rounded-2xl border border-border/60 bg-card/40 animate-pulse" />
+              }
+            >
+              <LivingEcosystem health={health} />
+            </Suspense>
             <p className="text-sm text-muted-foreground">
               {todayDelta == null
                 ? "Each habit you log shapes this world — trees thicken, fireflies return, mist lifts."
