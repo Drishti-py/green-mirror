@@ -106,4 +106,4 @@ export const CarbonOrb = memo(function CarbonOrb({ value, target = 417 }: Props)
       </div>
     </div>
   );
-}
+});
