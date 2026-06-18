@@ -136,4 +136,4 @@ export const LivingEcosystem = memo(function LivingEcosystem({ health }: Props) 
       </svg>
     </div>
   );
-}
+});
