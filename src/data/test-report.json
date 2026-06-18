@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-18T18:13:55.396Z",
+  "generatedAt": "2026-06-18T18:24:29.917Z",
   "totals": {
-    "passed": 94,
+    "passed": 107,
     "failed": 0,
-    "total": 94,
-    "suites": 26
+    "total": 107,
+    "suites": 30
   },
   "overallCoverage": {
-    "lines": 97.67,
-    "statements": 97.14,
+    "lines": 97.7,
+    "statements": 97.16,
     "functions": 95,
     "branches": 93.75
   },
