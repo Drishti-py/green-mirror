@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { logReflection } from "@/lib/reflection.functions";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ interface Props {
   onLogged: (delta: number) => void;
 }
 
-export function ReflectionRitual({ initial, onLogged }: Props) {
+export const ReflectionRitual = memo(function ReflectionRitual({ initial, onLogged }: Props) {
   const submit = useServerFn(logReflection);
   const [transport, setTransport] = useState<Transport>(
     (initial?.transport_mode as Transport) ?? "transit",
@@ -55,7 +55,7 @@ export function ReflectionRitual({ initial, onLogged }: Props) {
   const [busy, setBusy] = useState(false);
   const logged = initial != null;
 
-  async function handleSubmit() {
+  const handleSubmit = useCallback(async () => {
     setBusy(true);
     try {
       const res = await submit({
@@ -80,7 +80,7 @@ export function ReflectionRitual({ initial, onLogged }: Props) {
     } finally {
       setBusy(false);
     }
-  }
+  }, [submit, transport, meals, energy, water, waste, mood, notes, onLogged]);
 
   return (
     <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur p-7 space-y-6">
