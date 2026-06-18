@@ -131,4 +131,4 @@ export const CoachPanel = memo(function CoachPanel({ baselineKg, context }: Prop
       </form>
     </div>
   );
-}
+});
